@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <title>Расписание занятий</title>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #000;
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin: 15px 0; 
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .full {
+            background: linear-gradient(180deg, #ffcc00 0%, #ffd700 100%);
+        }
+        
+        .normal {
+            background: linear-gradient(180deg, #ffeb3b 0%, #fff176 100%);
+        }
+        
+        .registered {
+            background: linear-gradient(180deg, #ffeb3b 0%, #ffe082 100%);
+        }
+
+        .btn-primary {
+            border-radius: 20px;
+            background-color: #000;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #464646;
+        }
+
+        .btn-danger {
+            border-radius: 20px;
+            background-color: #d72626;
+            border: none;
+            transition: background-color 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: #be1111;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .card-text {
+            font-size: 1rem;
+        }
+
+        .row {
+            justify-content: center; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Расписание занятий</h1>
+        <div id="schedule" class="row"></div>
+    </div>
+
+    <script>
+        const activities = [
+            { name: "Йога", time: "08:00", maxParticipants: 10, currentParticipants: 8 },
+            { name: "Пилатес", time: "09:30", maxParticipants: 15, currentParticipants: 10 },
+            { name: "Сила", time: "11:00", maxParticipants: 20, currentParticipants: 20 },
+        ];
+
+        function renderActivities() {
+            const scheduleDiv = document.getElementById('schedule');
+            scheduleDiv.innerHTML = '';
+
+            activities.forEach((activity, index) => {
+                const card = document.createElement('div');
+                card.className = `col-md-6 col-lg-4`; // Размеры карточек для различных экранов
+
+                const cardContent = document.createElement('div');
+                cardContent.className = `card ${getCardClass(activity)}`;
+                cardContent.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${activity.name}</h5>
+                        <p class="card-text">Время: ${activity.time}</p>
+                        <p class="card-text">Макс. участников: ${activity.maxParticipants}</p>
+                        <p class="card-text">Записанные участники: ${activity.currentParticipants}</p>
+                        <button class="btn btn-primary" id="register-${index}">Записаться</button>
+                        <button class="btn btn-danger d-none" id="cancel-${index}">Отменить запись</button>
+                    </div>
+                `;
+
+                card.appendChild(cardContent);
+                scheduleDiv.appendChild(card);
+                updateButtons(index);
+                
+                const registerButton = document.getElementById(`register-${index}`);
+                const cancelButton = document.getElementById(`cancel-${index}`);
+
+                registerButton.addEventListener('click', () => {
+                    if (activity.currentParticipants < activity.maxParticipants) {
+                        activity.currentParticipants++;
+                        updateButtons(index);
+                        renderActivities();
+                    }
+                });
+
+                cancelButton.addEventListener('click', () => {
+                    if (activity.currentParticipants > 0) {
+                        activity.currentParticipants--;
+                        updateButtons(index);
+                        renderActivities();
+                    }
+                });
+            });
+        }
+
+        function updateButtons(index) {
+            const activity = activities[index];
+            const registerButton = document.getElementById(`register-${index}`);
+            const cancelButton = document.getElementById(`cancel-${index}`);
+            
+            if (activity.currentParticipants < activity.maxParticipants) {
+                registerButton.classList.remove('d-none');
+                registerButton.disabled = false;
+                cancelButton.classList.add('d-none');
+            } else {
+                registerButton.classList.add('d-none');
+                registerButton.disabled = true;
+            }
+            
+            if (activity.currentParticipants > 0) {
+                cancelButton.classList.remove('d-none');
+            } else {
+                cancelButton.classList.add('d-none');
+            }
+        }
+
+        function getCardClass(activity) {
+            if (activity.currentParticipants >= activity.maxParticipants) {
+                return 'full';
+            } else if (activity.currentParticipants > 0) {
+                return 'registered';
+            } else {
+                return 'normal';
+            }
+        }
+
+        renderActivities();
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
